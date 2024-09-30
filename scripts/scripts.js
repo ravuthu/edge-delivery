@@ -1,5 +1,4 @@
 import {
-  sampleRUM,
   buildBlock,
   loadHeader,
   loadFooter,
@@ -8,12 +7,52 @@ import {
   decorateSections,
   decorateBlocks,
   decorateTemplateAndTheme,
-  waitForLCP,
-  loadBlocks,
+  waitForFirstImage,
+  loadSection,
+  loadSections,
   loadCSS,
+  sampleRUM,
 } from './aem.js';
 
-const LCP_BLOCKS = []; // add your LCP blocks to the list
+/**
+ * create an element.
+ * @param {string} tagName the tag for the element
+ * @param {object} props properties to apply
+ * @param {string|Element} html content to add
+ * @returns the element
+ */
+export function createElement(tagName, props, html) {
+  const elem = document.createElement(tagName);
+  if (props) {
+    Object.keys(props).forEach((propName) => {
+      const val = props[propName];
+      if (propName === 'class') {
+        const classesArr = (typeof val === 'string') ? [val] : val;
+        elem.classList.add(...classesArr);
+      } else {
+        elem.setAttribute(propName, val);
+      }
+    });
+  }
+
+  if (html) {
+    const appendEl = (el) => {
+      if (el instanceof HTMLElement || el instanceof SVGElement) {
+        elem.append(el);
+      } else {
+        elem.insertAdjacentHTML('beforeend', el);
+      }
+    };
+
+    if (Array.isArray(html)) {
+      html.forEach(appendEl);
+    } else {
+      appendEl(html);
+    }
+  }
+
+  return elem;
+}
 
 /**
  * Builds hero block and prepends to main in a new section.
@@ -22,12 +61,18 @@ const LCP_BLOCKS = []; // add your LCP blocks to the list
 function buildHeroBlock(main) {
   const h1 = main.querySelector('h1');
   const picture = main.querySelector('picture');
+
+  const section = h1.closest('div');
+  const elems = [...section.children];
+  const filtered = elems.filter((el) => !el.classList.contains('section-metadata') && !el.classList.contains('alert'));
+  const block = buildBlock('hero', { elems: filtered });
+  section.append(block);
   // eslint-disable-next-line no-bitwise
-  if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-    const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
-    main.prepend(section);
-  }
+  // if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
+  //   const section = document.createElement('div');
+  //   section.append(buildBlock('hero', { elems: [picture, h1] }));
+  //   main.prepend(section);
+  // }
 }
 
 /**
@@ -80,8 +125,10 @@ async function loadEager(doc) {
   if (main) {
     decorateMain(main);
     document.body.classList.add('appear');
-    await waitForLCP(LCP_BLOCKS);
+    await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
+
+  sampleRUM.enhance();
 
   try {
     /* if desktop (proxy for fast connection) or fonts already loaded, load fonts.css */
@@ -99,7 +146,7 @@ async function loadEager(doc) {
  */
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
-  await loadBlocks(main);
+  await loadSections(main);
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
@@ -110,10 +157,6 @@ async function loadLazy(doc) {
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   loadFonts();
-
-  sampleRUM('lazy');
-  sampleRUM.observe(main.querySelectorAll('div[data-block-name]'));
-  sampleRUM.observe(main.querySelectorAll('picture > img'));
 }
 
 /**

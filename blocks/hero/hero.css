@@ -1,39 +1,99 @@
-/* block specific CSS goes here */
-
-main .hero-container > div {
+.hero-container .hero-wrapper {
   max-width: unset;
-}
-  
-main .hero-container {
   padding: 0;
 }
-  
-main .hero {
+
+.hero {
   position: relative;
-  padding: 32px;
+  padding: 40px 24px;
   min-height: 300px;
+  color: var(--background-color);
 }
 
-main .hero h1 {
+.hero p:first-child {
+  margin: 0;
+}
+
+.hero .hero-heading {
+  background-color: #5d0096;
+  padding: 32px 32px 16px;
+  border-radius: 16px 16px 0 0;
+}
+
+.hero h1 {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  color: white;
+  color: var(--background-color);
+  font-size: 2.5rem;
+  line-height: 3.5rem;
 }
 
-main .hero picture {
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  object-fit: cover;
-  box-sizing: border-box;
+.hero .disclaimer {
+  font-size: 0.8rem;
 }
 
-main .hero img {
-  object-fit: cover;
+.hero .button-container {
+  margin: 0;
+}
+
+.hero .button {
   width: 100%;
   height: 100%;
+  padding: 1rem;
+  background-color: #d4b8e0 !important;
+  color: #5d0096 !important;
+  border-color: #d4b8e0 !important;
+  border-radius: 10px !important;
+}
+
+.hero .hero-inner-row:last-child {
+  background-color: #ede5f4;
+  padding: 32px 32px 16px;
+  color: #333;
+  border-radius: 0 0 16px 16px;
+}
+
+.hero h2, .hero h3 {
+  color: #632787;
+}
+
+.hero img {
+  display: block;
+}
+
+@media (width >= 900px) {
+  .hero {
+    padding: 40px 32px;
+  }
+
+  .hero .hero-inner-row {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
+  .hero .hero-inner-row > div {
+    flex: 1 1 0;
+    width: 0;
+  }
+
+  .hero .hero-heading {
+    border-radius: 16px 0 0 0;
+  }
+
+  .hero .button-container {
+    width: calc(33% - 20px);
+    float: left;
+    margin-right: 20px;
+  }
+
+  .hero .button {
+    white-space: unset !important;
+  }
+
+  .hero img {
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0 16px 0 0;
+  }
 }
